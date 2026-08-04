@@ -1,0 +1,6 @@
+{
+  "name": "日常靈感扭蛋機",
+  "description": "拯救選擇困難與每日靈感抽卡，結合 AI 雲端扭蛋機與選擇障礙診所",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
