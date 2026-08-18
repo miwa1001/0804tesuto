@@ -6,7 +6,7 @@ import { GachaponHistory } from './components/GachaponHistory';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { Toast } from './components/Toast';
 import { Confetti } from './components/Confetti';
-import { Volume2, VolumeX, Sparkles, Dices, History, Key, Lock } from 'lucide-react';
+import { Volume2, VolumeX, Sparkles, Dices, History, Key, Lock, Sparkle } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'fortune' | 'decision' | 'history'>('fortune');
@@ -15,7 +15,6 @@ export default function App() {
   const [confettiTrigger, setConfettiTrigger] = useState(false);
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   
-  // 從本地儲存讀取使用者的 API Key
   const [userApiKey, setUserApiKey] = useState<string>(() => {
     try {
       return localStorage.getItem('gemini_custom_api_key') || '';
@@ -43,9 +42,7 @@ export default function App() {
         localStorage.removeItem('gemini_custom_api_key');
         showToast('已移除 API Key 🔒');
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   };
 
   const showToast = (msg: string) => {
@@ -66,23 +63,11 @@ export default function App() {
   };
 
   const handleSaveHistory = (category: string, result: string) => {
-    const time = new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    const newItem: HistoryItem = {
-      id: Date.now().toString(),
-      category,
-      result,
-      time,
-    };
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newItem: HistoryItem = { id: Date.now().toString(), category, result, time };
     const updated = [newItem, ...history].slice(0, 20);
     setHistory(updated);
-    try {
-      localStorage.setItem('gacha_history', JSON.stringify(updated));
-    } catch {
-      // ignore
-    }
+    try { localStorage.setItem('gacha_history', JSON.stringify(updated)); } catch { }
   };
 
   const handleClearHistory = () => {
@@ -103,12 +88,9 @@ export default function App() {
             <div>
               <h1 className="text-xl sm:text-2xl font-black tracking-wide text-[#3D348B] flex items-center gap-2">
                 日常靈感扭蛋機
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border border-[#3D348B] font-bold ${userApiKey ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
-                  {userApiKey ? '● 已授權' : '○ 未設定 Key'}
-                </span>
               </h1>
               <p className="text-xs font-semibold text-purple-600/80">
-                請輸入您的 Gemini API Key 以啟動 AI 扭蛋！
+                {userApiKey ? '✨ AI 模式已啟動' : '🔒 設定 Key 以開啟 AI 功能'}
               </p>
             </div>
           </div>
@@ -117,21 +99,14 @@ export default function App() {
             <button
               onClick={() => setIsKeyModalOpen(true)}
               className={`p-3 rounded-2xl border-2 border-[#3D348B] transition shadow-sm font-bold flex items-center gap-1.5 text-xs cursor-pointer ${
-                userApiKey
-                  ? 'bg-amber-100 text-amber-900 hover:bg-amber-200'
-                  : 'bg-[#FF94B9] text-white hover:opacity-90 animate-pulse'
+                userApiKey ? 'bg-amber-100 text-amber-900' : 'bg-white text-gray-400'
               }`}
             >
               <Key className="w-4 h-4" />
-              <span className="hidden sm:inline">
-                {userApiKey ? '金鑰設定' : '立即設定 Key'}
-              </span>
+              <span className="hidden sm:inline">{userApiKey ? '金鑰已設定' : '設定 Key'}</span>
             </button>
 
-            <button
-              onClick={toggleSound}
-              className="p-3 rounded-2xl bg-white border-2 border-[#3D348B] text-[#3D348B] hover:bg-[#FFF0F5] transition shadow-sm font-bold flex items-center gap-1.5 text-xs cursor-pointer"
-            >
+            <button onClick={toggleSound} className="p-3 rounded-2xl bg-white border-2 border-[#3D348B] text-[#3D348B] shadow-sm">
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-gray-400" />}
             </button>
           </div>
@@ -144,73 +119,68 @@ export default function App() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2.5 rounded-xl transition-all duration-200 text-center flex items-center justify-center space-x-1.5 cursor-pointer ${
-                activeTab === tab
-                  ? 'bg-white text-[#3D348B] shadow-sm border border-[#3D348B] font-black'
-                  : 'hover:text-purple-900 font-bold'
+                activeTab === tab ? 'bg-white shadow-sm border border-[#3D348B] font-black' : 'hover:text-purple-900 font-bold'
               }`}
             >
-              {tab === 'fortune' && <Sparkles className="w-4 h-4" />}
-              {tab === 'decision' && <Dices className="w-4 h-4" />}
-              {tab === 'history' && <History className="w-4 h-4" />}
-              <span>{tab === 'fortune' ? '靈感扭蛋' : tab === 'decision' ? '選擇診所' : '扭蛋紀錄'}</span>
+              {tab === 'fortune' && <Sparkles className="w-4 h-4 text-purple-700" />}
+              {tab === 'decision' && <Dices className="w-4 h-4 text-purple-700" />}
+              {tab === 'history' && <History className="w-4 h-4 text-purple-700" />}
+              <span>{tab === 'fortune' ? '靈感扭蛋' : tab === 'decision' ? '選擇診所' : '紀錄'}</span>
             </button>
           ))}
         </nav>
 
         {/* Main View Container */}
         <main className="flex-grow flex flex-col justify-center">
-          {/* 如果沒有 Key 且不是在看歷史紀錄，顯示鎖定畫面 */}
-          {!userApiKey && activeTab !== 'history' ? (
-            <div className="bg-white/80 backdrop-blur-sm p-10 rounded-[40px] border-4 border-dashed border-[#3D348B] flex flex-col items-center text-center gap-6 shadow-xl">
-              <div className="w-20 h-20 bg-[#FF94B9] rounded-3xl flex items-center justify-center border-4 border-[#3D348B] rotate-6 shadow-lg">
-                <Lock className="w-10 h-10 text-white" />
+          
+          {/* 1. 只有「靈感扭蛋」需要檢查 Key */}
+          {activeTab === 'fortune' && (
+            !userApiKey ? (
+              <div className="bg-white/80 backdrop-blur-sm p-10 rounded-[40px] border-4 border-dashed border-[#3D348B] flex flex-col items-center text-center gap-6 shadow-xl">
+                <div className="w-20 h-20 bg-[#FF94B9] rounded-3xl flex items-center justify-center border-4 border-[#3D348B] rotate-6 shadow-lg">
+                  <Sparkles className="w-10 h-10 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black mb-2">AI 扭蛋需要金鑰</h2>
+                  <p className="text-sm font-bold text-gray-500">
+                    「靈感扭蛋」功能由 Google Gemini 驅動，<br/>
+                    請設定您的 API Key 即可開啟即時靈感生成！
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsKeyModalOpen(true)}
+                  className="px-8 py-4 bg-[#FF94B9] text-white rounded-2xl font-black border-2 border-[#3D348B] shadow-[4px_4px_0px_0px_rgba(61,52,139,1)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                >
+                  前往設定 API Key
+                </button>
               </div>
-              <div>
-                <h2 className="text-2xl font-black mb-2">扭蛋機尚未啟動</h2>
-                <p className="text-sm font-bold text-gray-500 leading-relaxed">
-                  本工具使用您的個人金鑰進行 AI 運算。<br/>
-                  請先完成 API Key 設定，即可開始獲取每日靈感！
-                </p>
-              </div>
-              <button
-                onClick={() => setIsKeyModalOpen(true)}
-                className="px-8 py-4 bg-[#FF94B9] text-white rounded-2xl font-black border-2 border-[#3D348B] shadow-[4px_4px_0px_0px_rgba(61,52,139,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
-              >
-                前往設定 API Key
-              </button>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                Safe · Private · Powered by Gemini
-              </p>
-            </div>
-          ) : (
-            <>
-              {activeTab === 'fortune' && (
-                <GachaponFortune
-                  soundEnabled={soundEnabled}
-                  userApiKey={userApiKey}
-                  showToast={showToast}
-                  triggerConfetti={triggerConfetti}
-                  onSaveHistory={handleSaveHistory}
-                />
-              )}
+            ) : (
+              <GachaponFortune
+                soundEnabled={soundEnabled}
+                userApiKey={userApiKey}
+                showToast={showToast}
+                triggerConfetti={triggerConfetti}
+                onSaveHistory={handleSaveHistory}
+              />
+            )
+          )}
 
-              {activeTab === 'decision' && (
-                <DecisionClinic
-                  soundEnabled={soundEnabled}
-                  userApiKey={userApiKey}
-                  showToast={showToast}
-                  triggerConfetti={triggerConfetti}
-                  onSaveHistory={handleSaveHistory}
-                />
-              )}
+          {/* 2. 「選擇診所」不需要 Key，直接顯示 */}
+          {activeTab === 'decision' && (
+            <DecisionClinic
+              soundEnabled={soundEnabled}
+              showToast={showToast}
+              triggerConfetti={triggerConfetti}
+              onSaveHistory={handleSaveHistory}
+            />
+          )}
 
-              {activeTab === 'history' && (
-                <GachaponHistory
-                  history={history}
-                  onClearHistory={handleClearHistory}
-                />
-              )}
-            </>
+          {/* 3. 「扭蛋紀錄」不需要 Key，直接顯示 */}
+          {activeTab === 'history' && (
+            <GachaponHistory
+              history={history}
+              onClearHistory={handleClearHistory}
+            />
           )}
         </main>
 
